@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebSocket Basic</title>
+  </head>
+  <body>
+    <h1>WebSocket Basic</h1>
+    <b>ClientID: <span id="clientId"></span></b>
+    <div>
+      <input type="text" id="id" style="width: 16px" />
+      <input type="text" id="message" />
+      <button type="button" onclick="sendMessage()">送信</button>
+    </div>
+    <ul id="message_list"></ul>
+
+    <script>
+      const socket = new WebSocket('ws://192.168.10.103:3000');
+      socket.addEventListener('open', (e) => {
+        console.log('接続');
+      });
+      socket.addEventListener('message', (e) => {
+        console.log('サーバーからメッセージを受信');
+        if (typeof e.data === 'string') {
+          console.log(e.data);
+          if (e.data.slice(0, 2) === 'id') {
+            document.getElementById('clientId').textContent = e.data.slice(2);
+          } else if (e.data.slice(0, 2) === 'me') {
+            const li = document.createElement('li');
+            li.textContent = e.data.slice(2);
+            document.getElementById('message_list').appendChild(li);
+          }
+        }
+      });
+      socket.addEventListener('close', (e) => {
+        console.log('切断');
+      });
+      socket.addEventListener('error', (e) => {
+        console.log('エラーが発生したときに呼び出されるイベント');
+      });
+
+      const sendMessage = (e) => {
+        const id = document.getElementById('id').value;
+        const message = document.getElementById('message').value;
+        socket.send(`${message},${id}`);
+      };
+    </script>
+  </body>
+</html>
